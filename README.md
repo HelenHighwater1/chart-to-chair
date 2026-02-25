@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plain Language Medical Record Translator
+
+**A project by Helen for [Citizen Health](https://www.citizenhealth.io)**
+
+---
+
+Paste a clinical note or lab result and get a clear, jargon-free explanation — plus questions to bring to your next doctor's visit.
+
+This project demonstrates a core piece of what Citizen Health's AI Advocate does: translating medical complexity into clarity and empowerment for patients and families navigating complex conditions.
+
+## Why I Built This
+
+Citizen Health's mission resonates deeply with me — using AI to put patients and families back in control of their healthcare data. This tool is a focused demonstration of that vision: taking intimidating clinical language and making it approachable, warm, and actionable.
+
+It also showcases the skills relevant to the role:
+
+- **React / Next.js** — App Router, server components, client components, streaming
+- **API Integration** — Anthropic Claude API with real-time streaming responses
+- **Accessibility** — Semantic HTML, ARIA labels, focus trapping, keyboard navigation, screen reader support
+- **Design Sensibility** — Warm, empathetic UI inspired by Citizen Health's own design language
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- An [Anthropic API key](https://console.anthropic.com/)
+
+### Setup
+
+```bash
+git clone https://github.com/helen/citizen-health-translator.git
+cd citizen-health-translator
+npm install
+```
+
+Create a `.env.local` file in the root:
+
+```
+ANTHROPIC_API_KEY=your-api-key-here
+```
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16** (App Router + Turbopack)
+- **Tailwind CSS v4**
+- **Anthropic Claude API** with streaming
+- **TypeScript**
+- Deployed on **Vercel**
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+1. Paste a clinical note, lab result, or discharge summary into the text area (or click "Try a sample" to see it in action)
+2. Click "Translate to Plain Language"
+3. The app streams back two sections:
+   - **In Plain Language** — a warm, clear explanation at a 6th-grade reading level
+   - **Questions for Your Next Visit** — practical questions you can bring to your doctor
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The AI is instructed to be honest but reassuring, explain *why* things matter (not just what they are), and never provide medical advice — always encouraging patients to talk to their doctor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+app/
+  layout.tsx              Root layout with fonts and metadata
+  page.tsx                Single page composing all sections
+  globals.css             Tailwind config + custom animations
+  api/translate/route.ts  Streaming API route for Claude
+components/
+  Header.tsx              Sticky header with About Me trigger
+  Hero.tsx                Hero section with headline
+  MedicalTranslator.tsx   Main client component (state management)
+  TranslateForm.tsx       Textarea + sample + submit
+  ResultsPanel.tsx        Streaming results with copy buttons
+  AboutMeModal.tsx        Modal with focus trap + keyboard dismissal
+  LoadingDots.tsx         Calm pulsing dot animation
+  Footer.tsx              Footer with GitHub link
+lib/
+  prompt.ts               System prompt for Claude
+  sample-note.ts          Sample CBC lab result for demo
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
