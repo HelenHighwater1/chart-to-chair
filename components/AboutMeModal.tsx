@@ -88,7 +88,7 @@ export default function AboutMeModal({ isOpen, onClose }: AboutMeModalProps) {
         <div className="mt-4 space-y-3 leading-relaxed text-gray-600">
           <p>
             I built this project as part of my application to{" "}
-            <span className="font-medium text-indigo-600">Citizen Health</span>.
+            <span className="font-medium text-terra-600">Citizen Health</span>.
           </p>
           <p>
             I&apos;m passionate about using technology to help families navigate
@@ -103,7 +103,7 @@ export default function AboutMeModal({ isOpen, onClose }: AboutMeModalProps) {
             href="https://heyimhelen.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+            className="inline-flex items-center gap-2 rounded-full bg-terra-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-terra-700"
           >
             Visit my website
             <svg

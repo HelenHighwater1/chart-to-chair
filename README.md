@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## How It Works
 
-1. Paste a clinical note, lab result, or discharge summary into the text area (or click "Try a sample" to see it in action)
+1. Paste a clinical note, lab result, or discharge summary into the text area (or pick a mock data example to see it in action)
 2. Click "Translate to Plain Language"
 3. The app streams back two sections:
    - **In Plain Language** — a warm, clear explanation at a 6th-grade reading level
