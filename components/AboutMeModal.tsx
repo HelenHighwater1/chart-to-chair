@@ -145,10 +145,6 @@ export default function AboutMeModal({ isOpen, onClose }: AboutMeModalProps) {
               understand what was happening to someone we loved.
             </p>
             <p>
-              That experience is why Citizen Health resonates with me in a way
-              that goes beyond a job listing.
-            </p>
-            <p>
               This app is to suppliment an application to join your SWE team. It
               takes a clinical document and translates it into something a
               frightened person can actually absorb - one piece at a time, in
