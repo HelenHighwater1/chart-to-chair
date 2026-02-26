@@ -114,7 +114,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
       )}
 
       <div
-        className={`flex items-end gap-2 rounded-xl border bg-surface p-2 transition-colors ${
+        className={`flex items-center gap-2 rounded-xl border bg-surface p-2 transition-colors ${
           isDragOver
             ? "border-moss-400 ring-2 ring-moss-100"
             : "border-warm-gray-200"

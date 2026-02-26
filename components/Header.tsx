@@ -12,9 +12,7 @@ export default function Header() {
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-moss-900">
-              Helen{" "}
-              <span className="text-warm-gray-300">·</span>{" "}
-              <span className="text-moss-600">for Citizen Health</span>
+              A demo by Helen Highwater
             </span>
           </div>
           <div className="flex items-center gap-3">

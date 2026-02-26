@@ -38,7 +38,12 @@ export default function ChatWindow() {
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (chatAreaRef.current) {
+        chatAreaRef.current.scrollTo({
+          top: chatAreaRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     }, 50);
   }, []);
 
@@ -331,6 +336,17 @@ export default function ChatWindow() {
     if (sampleId) {
       const doc = SAMPLE_DOCS.find((d) => d.id === sampleId);
       if (doc) handleSampleFromSidebar(doc);
+      return;
+    }
+    const file = e.dataTransfer.files[0];
+    if (
+      file &&
+      (file.type === "application/pdf" ||
+        file.name.endsWith(".txt") ||
+        file.name.endsWith(".eml") ||
+        file.type === "message/rfc822")
+    ) {
+      sendMessage("", file);
     }
   }
 
