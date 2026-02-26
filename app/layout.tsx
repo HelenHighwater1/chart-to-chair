@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: "Plain Language Medical Records — Helen for Citizen Health",
   description:
     "Paste a clinical note or lab result and get a clear, jargon-free explanation with follow-up questions for your next doctor visit.",
+  icons: {
+    icon: "/medical-charts-svgrepo-com.svg",
+  },
 };
 
 export default function RootLayout({

@@ -43,6 +43,12 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+button,
+a[href],
+[role="button"] {
+  cursor: pointer;
+}
+
 @keyframes pulse-dot {
   0%, 80%, 100% {
     opacity: 0.3;

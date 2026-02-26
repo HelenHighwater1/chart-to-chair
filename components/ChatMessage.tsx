@@ -177,7 +177,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
               )}
             </div>
           )}
-          <div className="rounded-2xl rounded-br-md bg-moss-50 px-4 py-3">
+          <div className="rounded-2xl rounded-br-md border border-moss-200 bg-moss-50 px-4 py-3">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 line-clamp-6">
               {message.content}
             </p>

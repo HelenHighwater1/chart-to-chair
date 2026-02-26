@@ -157,18 +157,13 @@ export default function ChatWindow() {
       const { done, value } = await reader.read();
       if (done) break;
       accumulated += decoder.decode(value, { stream: true });
-      const current = accumulated;
+    }
+
     setMessages([
       ...newMessages,
-      { id: nextMessageId(), role: "assistant", content: current, isStreaming: true },
+      { id: nextMessageId(), role: "assistant", content: accumulated },
     ]);
   }
-
-  setMessages([
-    ...newMessages,
-    { id: nextMessageId(), role: "assistant", content: accumulated },
-  ]);
-}
 
   async function sendMessage(text: string, file?: File) {
     let content = text;
