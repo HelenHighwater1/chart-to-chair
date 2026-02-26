@@ -1,37 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFAF7;
-  --foreground: #3D2F2A;
+  --background: #faf9f7;
+  --foreground: #5f7a7d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: #fffefd;
+  --color-chat-bg: #f5f4f0;
+
+  --color-moss-50: #e6ebe6;
+  --color-moss-100: #c5d0c5;
+  --color-moss-200: #9eb09e;
+  --color-moss-300: #7a907a;
+  --color-moss-400: #5f755f;
+  --color-moss-500: #5f755f;
+  --color-moss-600: #526a52;
+  --color-moss-700: #4a5d4a;
+  --color-moss-800: #3d4f3d;
+  --color-moss-900: #2d3a2d;
+
+  --color-warm-gray-50: #ede8e0;
+  --color-warm-gray-100: #e2d4be;
+  --color-warm-gray-200: #adbab3;
+  --color-warm-gray-300: #9faea6;
+  --color-warm-gray-400: #8f9e95;
+  --color-warm-gray-500: #65684d;
+  --color-warm-gray-600: #65684d;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-dm-serif);
   --animate-pulse-dot: pulse-dot 1.4s ease-in-out infinite;
   --animate-fade-in: fade-in 0.2s ease-out;
   --animate-slide-up: slide-up 0.3s ease-out;
-
-  --color-terra-50: #FDF5F0;
-  --color-terra-100: #F8E8DE;
-  --color-terra-200: #F0D0BE;
-  --color-terra-300: #E5B39A;
-  --color-terra-400: #D4916F;
-  --color-terra-500: #C2785C;
-  --color-terra-600: #B06A4F;
-  --color-terra-700: #925640;
-  --color-terra-800: #6F4233;
-  --color-terra-900: #4A2D22;
-
-  --color-warm-gray-50: #FAF8F6;
-  --color-warm-gray-100: #F0ECEA;
-  --color-warm-gray-200: #E5DDD8;
-  --color-warm-gray-300: #D4CAC3;
-  --color-warm-gray-400: #A89991;
-  --color-warm-gray-500: #8A7B73;
 }
 
 body {

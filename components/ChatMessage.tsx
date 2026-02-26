@@ -4,6 +4,7 @@ import LoadingDots from "./LoadingDots";
 import type { CardSection } from "./CardMessage";
 
 export interface Message {
+  id?: string;
   role: "user" | "assistant";
   content: string;
   attachment?: string;
@@ -53,7 +54,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
                         });
                       }
                     }}
-                    className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700 transition-colors hover:bg-terra-200"
+                    className="inline-flex items-center gap-1 rounded-full bg-moss-100 px-2.5 py-0.5 text-xs font-medium text-moss-700 transition-colors hover:bg-moss-200"
                   >
                     <svg
                       width="12"
@@ -88,7 +89,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
                   <button
                     type="button"
                     onClick={() => onViewPdf!(message.attachmentUrl!)}
-                    className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700 transition-colors hover:bg-terra-200"
+                    className="inline-flex items-center gap-1 rounded-full bg-moss-100 px-2.5 py-0.5 text-xs font-medium text-moss-700 transition-colors hover:bg-moss-200"
                   >
                     <svg
                       width="12"
@@ -124,7 +125,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
                     href={message.attachmentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700 transition-colors hover:bg-terra-200"
+                    className="inline-flex items-center gap-1 rounded-full bg-moss-100 px-2.5 py-0.5 text-xs font-medium text-moss-700 transition-colors hover:bg-moss-200"
                   >
                     <svg
                       width="12"
@@ -157,7 +158,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
                   </a>
                 )
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-moss-100 px-2.5 py-0.5 text-xs font-medium text-moss-700">
                   <svg
                     width="12"
                     height="12"
@@ -176,7 +177,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
               )}
             </div>
           )}
-          <div className="rounded-2xl rounded-br-md bg-terra-50 px-4 py-3">
+          <div className="rounded-2xl rounded-br-md bg-moss-50 px-4 py-3">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 line-clamp-6">
               {message.content}
             </p>
@@ -207,7 +208,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
               <p key={i}>{paragraph}</p>
             ))}
             {message.isStreaming && message.content && (
-              <span className="inline-block h-3 w-1 animate-pulse rounded-full bg-terra-400" />
+              <span className="inline-block h-3 w-1 animate-pulse rounded-full bg-moss-400" />
             )}
           </div>
           {!message.isStreaming && message.content && !message.isReviewingPlaceholder && (

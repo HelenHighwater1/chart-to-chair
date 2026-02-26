@@ -7,7 +7,7 @@ export default function Footer() {
           href="https://github.com/helen/citizen-health-translator"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-terra-400 transition-colors hover:text-terra-600"
+          className="text-moss-400 transition-colors hover:text-moss-600"
         >
           View on GitHub
         </a>

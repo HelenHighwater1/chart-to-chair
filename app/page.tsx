@@ -8,7 +8,7 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-[var(--background)]">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:text-terra-600"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:text-moss-600"
       >
         Skip to main content
       </a>

@@ -19,13 +19,13 @@ export default function CardMessage({ card }: CardMessageProps) {
         <div
           className={`rounded-2xl rounded-bl-md px-4 py-3 shadow-sm ${
             isQuestions
-              ? "border border-terra-100 bg-terra-50/40"
+              ? "border border-moss-100 bg-moss-50/40"
               : "border border-warm-gray-200 bg-white"
           }`}
         >
           <p
             className={`mb-2 text-[11px] font-semibold uppercase tracking-wider ${
-              isQuestions ? "text-terra-500" : "text-warm-gray-400"
+              isQuestions ? "text-moss-500" : "text-warm-gray-400"
             }`}
           >
             {card.label}
@@ -37,7 +37,7 @@ export default function CardMessage({ card }: CardMessageProps) {
                 .filter((line) => line.trim())
                 .map((question, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-terra-100 text-[10px] font-bold text-terra-600">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-moss-100 text-[10px] font-bold text-moss-600">
                       {i + 1}
                     </span>
                     <p className="text-sm leading-relaxed text-gray-700">

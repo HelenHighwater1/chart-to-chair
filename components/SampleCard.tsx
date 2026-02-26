@@ -20,14 +20,14 @@ export default function SampleCard({ doc, onSelect, onViewEmail, onViewPdf }: Sa
     <div
       draggable
       onDragStart={handleDragStart}
-      className="rounded-xl border border-warm-gray-200 bg-white transition-all hover:border-terra-200 hover:shadow-sm cursor-grab active:cursor-grabbing"
+      className="rounded-xl border border-warm-gray-200 bg-surface transition-all hover:border-moss-200 hover:shadow-sm cursor-grab active:cursor-grabbing"
     >
       <button
         onClick={() => onSelect(doc)}
         className="flex w-full items-start gap-3 p-4 text-left active:scale-[0.98]"
         aria-label={`Use mock example: ${doc.title}`}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-terra-50 text-terra-600">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-moss-50 text-moss-600">
           {doc.type === "pdf" ? (
             <svg
               width="18"
@@ -73,7 +73,7 @@ export default function SampleCard({ doc, onSelect, onViewEmail, onViewPdf }: Sa
                 e.stopPropagation();
                 onViewEmail({ type: "url", url: doc.fileUrl });
               }}
-              className="inline-flex items-center gap-1 text-xs text-terra-500 transition-colors hover:text-terra-700"
+              className="inline-flex items-center gap-1 text-xs text-moss-500 transition-colors hover:text-moss-700"
             >
               <svg
                 width="12"
@@ -97,7 +97,7 @@ export default function SampleCard({ doc, onSelect, onViewEmail, onViewPdf }: Sa
                 e.stopPropagation();
                 onViewPdf(doc.fileUrl);
               }}
-              className="inline-flex items-center gap-1 text-xs text-terra-500 transition-colors hover:text-terra-700"
+              className="inline-flex items-center gap-1 text-xs text-moss-500 transition-colors hover:text-moss-700"
             >
               <svg
                 width="12"
@@ -120,7 +120,7 @@ export default function SampleCard({ doc, onSelect, onViewEmail, onViewPdf }: Sa
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-xs text-terra-500 transition-colors hover:text-terra-700"
+              className="inline-flex items-center gap-1 text-xs text-moss-500 transition-colors hover:text-moss-700"
             >
               <svg
                 width="12"

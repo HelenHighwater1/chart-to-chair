@@ -7,15 +7,15 @@ export default function LoadingDots() {
     >
       <span className="sr-only">Translating your medical record…</span>
       <span
-        className="h-2 w-2 rounded-full bg-terra-400 animate-pulse-dot"
+        className="h-2 w-2 rounded-full bg-moss-400 animate-pulse-dot"
         style={{ animationDelay: "0ms" }}
       />
       <span
-        className="h-2 w-2 rounded-full bg-terra-400 animate-pulse-dot"
+        className="h-2 w-2 rounded-full bg-moss-400 animate-pulse-dot"
         style={{ animationDelay: "200ms" }}
       />
       <span
-        className="h-2 w-2 rounded-full bg-terra-400 animate-pulse-dot"
+        className="h-2 w-2 rounded-full bg-moss-400 animate-pulse-dot"
         style={{ animationDelay: "400ms" }}
       />
     </div>

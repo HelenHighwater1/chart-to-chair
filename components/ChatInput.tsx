@@ -6,7 +6,6 @@ interface ChatInputProps {
   onSend: (text: string, file?: File) => void;
   disabled: boolean;
   placeholder?: string;
-  onFileDrop?: (file: File) => void;
 }
 
 export default function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
@@ -82,10 +81,10 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
   const hasContent = text.trim() || pendingFile;
 
   return (
-    <div className="border-t border-warm-gray-200 bg-warm-gray-50 p-3">
+    <div className="border-t border-warm-gray-200 bg-surface p-3">
       {pendingFile && (
         <div className="mb-2 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-terra-100 px-3 py-1 text-xs font-medium text-terra-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700">
             <svg
               width="12"
               height="12"
@@ -102,7 +101,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
             {pendingFile.name}
             <button
               onClick={() => setPendingFile(null)}
-              className="ml-1 rounded-full p-0.5 hover:bg-terra-200"
+              className="ml-1 rounded-full p-0.5 hover:bg-moss-200"
               aria-label="Remove file"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -115,9 +114,9 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
       )}
 
       <div
-        className={`flex items-end gap-2 rounded-xl border bg-white p-2 transition-colors ${
+        className={`flex items-end gap-2 rounded-xl border bg-surface p-2 transition-colors ${
           isDragOver
-            ? "border-terra-400 ring-2 ring-terra-100"
+            ? "border-moss-400 ring-2 ring-moss-100"
             : "border-warm-gray-200"
         }`}
         onDragOver={handleDragOver}
@@ -169,7 +168,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !hasContent}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-terra-600 text-white transition-all hover:bg-terra-700 disabled:opacity-40 disabled:hover:bg-terra-600"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-moss-600 text-white transition-all hover:bg-moss-700 disabled:opacity-40 disabled:hover:bg-moss-600"
           aria-label="Send message"
         >
           <svg

@@ -17,6 +17,12 @@ interface PendingCards {
   revealedCount: number;
 }
 
+function nextMessageId(): string {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
 export default function ChatWindow() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +34,7 @@ export default function ChatWindow() {
   const [pdfModalUrl, setPdfModalUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatAreaRef = useRef<HTMLDivElement>(null);
+  const blobUrlsRef = useRef<Set<string>>(new Set());
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -44,6 +51,29 @@ export default function ChatWindow() {
       showSummary;
     if (shouldScroll) scrollToBottom();
   }, [messages, pendingCards?.revealedCount, showSummary, scrollToBottom]);
+
+  // Revoke blob URLs when messages no longer reference them
+  useEffect(() => {
+    const currentUrls = new Set(
+      messages
+        .map((m) => m.attachmentUrl)
+        .filter((url): url is string => typeof url === "string" && url.startsWith("blob:"))
+    );
+    blobUrlsRef.current.forEach((url) => {
+      if (!currentUrls.has(url)) {
+        URL.revokeObjectURL(url);
+        blobUrlsRef.current.delete(url);
+      }
+    });
+  }, [messages]);
+
+  // On unmount, revoke any remaining blob URLs
+  useEffect(() => {
+    return () => {
+      blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      blobUrlsRef.current.clear();
+    };
+  }, []);
 
   async function extractFileText(file: File): Promise<string> {
     const formData = new FormData();
@@ -105,17 +135,14 @@ export default function ChatWindow() {
       content: m.content,
     }));
 
-    if (isDistressed) {
-      apiMessages.unshift({
-        role: "user",
-        content: DISTRESS_PREAMBLE,
-      });
-    }
-
     const response = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: apiMessages, mode: "stream" }),
+      body: JSON.stringify({
+        messages: apiMessages,
+        mode: "stream",
+        ...(isDistressed && { systemPromptSuffix: DISTRESS_PREAMBLE }),
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to get response");
@@ -131,17 +158,17 @@ export default function ChatWindow() {
       if (done) break;
       accumulated += decoder.decode(value, { stream: true });
       const current = accumulated;
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: current, isStreaming: true },
-      ]);
-    }
-
     setMessages([
       ...newMessages,
-      { role: "assistant", content: accumulated },
+      { id: nextMessageId(), role: "assistant", content: current, isStreaming: true },
     ]);
   }
+
+  setMessages([
+    ...newMessages,
+    { id: nextMessageId(), role: "assistant", content: accumulated },
+  ]);
+}
 
   async function sendMessage(text: string, file?: File) {
     let content = text;
@@ -151,6 +178,7 @@ export default function ChatWindow() {
     if (file) {
       attachment = file.name;
       attachmentUrl = URL.createObjectURL(file);
+      blobUrlsRef.current.add(attachmentUrl);
       try {
         const extractedText = await extractFileText(file);
         content = content
@@ -163,66 +191,73 @@ export default function ChatWindow() {
 
     if (!content.trim()) return;
 
-    const userMessage: Message = { role: "user", content, attachment, attachmentUrl };
+    const userMessage: Message = { id: nextMessageId(), role: "user", content, attachment, attachmentUrl };
     const newMessages = [...messages, userMessage];
 
     const shouldStream = isFollowUp() && !file;
 
     if (shouldStream) {
-      setMessages([...newMessages, { role: "assistant", content: "", isStreaming: true }]);
+      setMessages([...newMessages, { id: nextMessageId(), role: "assistant", content: "", isStreaming: true }]);
       setIsStreaming(true);
       try {
         await streamFollowUp(newMessages, text);
       } catch {
         setMessages([
           ...newMessages,
-          { role: "assistant", content: "Sorry, something went wrong. Please try again." },
+          { id: nextMessageId(), role: "assistant", content: "Sorry, something went wrong. Please try again." },
         ]);
       } finally {
         setIsStreaming(false);
       }
     } else {
-      const reviewingPlaceholder: Message = {
-        role: "assistant",
-        content: "Let me just review this document — it will only take a minute.",
-        isReviewingPlaceholder: true,
-      };
-      setMessages([...newMessages, reviewingPlaceholder]);
-      setIsLoading(true);
-      setPendingCards(null);
-      setShowSummary(false);
+      await runCardsFlow(newMessages);
+    }
+  }
 
-      try {
-        const apiMessages = newMessages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        }));
-        const cards = await fetchCards(apiMessages);
-        const firstCardMessage: Message = {
-          role: "assistant",
-          content: cards[0].body,
-          cards: [cards[0]],
-        };
-        setMessages((prev) => [
-          ...prev.filter((m) => !m.isReviewingPlaceholder),
-          firstCardMessage,
-        ]);
-        if (cards.length <= 1) {
-          setPendingCards(null);
-        } else {
-          setPendingCards({ cards, revealedCount: 1 });
-        }
-      } catch (err) {
-        setMessages((prev) => [
-          ...prev.filter((m) => !m.isReviewingPlaceholder),
-          {
-            role: "assistant",
-            content: err instanceof Error ? err.message : "Sorry, something went wrong. Please try again.",
-          },
-        ]);
-      } finally {
-        setIsLoading(false);
+  async function runCardsFlow(newMessages: Message[]) {
+    const reviewingPlaceholder: Message = {
+      id: nextMessageId(),
+      role: "assistant",
+      content: "Let me just review this document — it will only take a minute.",
+      isReviewingPlaceholder: true,
+    };
+    setMessages([...newMessages, reviewingPlaceholder]);
+    setIsLoading(true);
+    setPendingCards(null);
+    setShowSummary(false);
+
+    try {
+      const apiMessages = newMessages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+      const cards = await fetchCards(apiMessages);
+      const firstCardMessage: Message = {
+        id: nextMessageId(),
+        role: "assistant",
+        content: cards[0].body,
+        cards: [cards[0]],
+      };
+      setMessages((prev) => [
+        ...prev.filter((m) => !m.isReviewingPlaceholder),
+        firstCardMessage,
+      ]);
+      if (cards.length <= 1) {
+        setPendingCards(null);
+      } else {
+        setPendingCards({ cards, revealedCount: 1 });
       }
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev.filter((m) => !m.isReviewingPlaceholder),
+        {
+          id: nextMessageId(),
+          role: "assistant",
+          content: err instanceof Error ? err.message : "Sorry, something went wrong. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -236,7 +271,7 @@ export default function ChatWindow() {
     const nextCard = pendingCards.cards[nextIndex];
     setMessages((prev) => [
       ...prev,
-      { role: "assistant" as const, content: nextCard.body, cards: [nextCard] },
+      { id: nextMessageId(), role: "assistant" as const, content: nextCard.body, cards: [nextCard] },
     ]);
     const newCount = nextIndex + 1;
     if (newCount >= pendingCards.cards.length) {
@@ -261,6 +296,7 @@ export default function ChatWindow() {
 
     if (doc.fileUrl && (doc.type === "pdf" || doc.type === "email")) {
       const loadingUserMsg: Message = {
+        id: nextMessageId(),
         role: "user",
         content: "Loading document...",
         attachment: attachmentLabel,
@@ -284,53 +320,14 @@ export default function ChatWindow() {
     }
 
     const userMessage: Message = {
+      id: nextMessageId(),
       role: "user",
       content,
       attachment: attachmentLabel,
       attachmentUrl,
     };
     const newMessages = [...messages, userMessage];
-    const reviewingPlaceholder: Message = {
-      role: "assistant",
-      content: "Let me just review this document — it will only take a minute.",
-      isReviewingPlaceholder: true,
-    };
-    setMessages([...newMessages, reviewingPlaceholder]);
-    setIsLoading(true);
-    setPendingCards(null);
-    setShowSummary(false);
-
-    try {
-      const apiMessages = newMessages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-      const cards = await fetchCards(apiMessages);
-      const firstCardMessage: Message = {
-        role: "assistant",
-        content: cards[0].body,
-        cards: [cards[0]],
-      };
-      setMessages((prev) => [
-        ...prev.filter((m) => !m.isReviewingPlaceholder),
-        firstCardMessage,
-      ]);
-      if (cards.length <= 1) {
-        setPendingCards(null);
-      } else {
-        setPendingCards({ cards, revealedCount: 1 });
-      }
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev.filter((m) => !m.isReviewingPlaceholder),
-        {
-          role: "assistant",
-          content: err instanceof Error ? err.message : "Sorry, something went wrong. Please try again.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
+    await runCardsFlow(newMessages);
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -379,7 +376,7 @@ export default function ChatWindow() {
       <Sidebar onSelectSample={handleSampleFromSidebar} onViewEmail={openEmailViewer} onViewPdf={openPdfViewer} />
 
       <div
-        className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-warm-gray-200 bg-white shadow-sm"
+        className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-warm-gray-200 bg-chat-bg shadow-sm"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -391,7 +388,7 @@ export default function ChatWindow() {
           {isEmpty && !isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-terra-50">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-moss-50">
                   <svg
                     width="24"
                     height="24"
@@ -401,7 +398,7 @@ export default function ChatWindow() {
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-terra-400"
+                    className="text-moss-400"
                   >
                     <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                   </svg>
@@ -416,17 +413,18 @@ export default function ChatWindow() {
           ) : (
             <div className="space-y-4">
               {messages.map((msg, i) => {
+                const msgKey = msg.id ?? i;
                 if (msg.cards && msg.cards.length > 0) {
                   return (
-                    <div key={i} className="space-y-3">
+                    <div key={msgKey} className="space-y-3">
                       {msg.cards.map((card, ci) => (
-                        <CardMessage key={ci} card={card} />
+                        <CardMessage key={`${msgKey}-${ci}`} card={card} />
                       ))}
                     </div>
                   );
                 }
 
-                return <ChatMessage key={i} message={msg} onViewEmail={openEmailViewer} onViewPdf={openPdfViewer} />;
+                return <ChatMessage key={msgKey} message={msg} onViewEmail={openEmailViewer} onViewPdf={openPdfViewer} />;
               })}
 
               {isLoading && !pendingCards && (
@@ -442,7 +440,7 @@ export default function ChatWindow() {
                   <button
                     onClick={handleContinue}
                     disabled={isStreaming}
-                    className="rounded-full border border-terra-200 bg-white px-5 py-2 text-sm font-medium text-terra-600 shadow-sm transition-all hover:bg-terra-50 hover:shadow-md active:scale-[0.97] disabled:opacity-40 disabled:hover:bg-white disabled:hover:shadow-sm"
+                    className="rounded-full border border-moss-200 bg-white px-5 py-2 text-sm font-medium text-moss-600 shadow-sm transition-all hover:bg-moss-50 hover:shadow-md active:scale-[0.97] disabled:opacity-40 disabled:hover:bg-white disabled:hover:shadow-sm"
                   >
                     Continue
                   </button>
@@ -453,7 +451,7 @@ export default function ChatWindow() {
                 <div className="flex justify-center py-3">
                   <button
                     onClick={() => setShowSummary(true)}
-                    className="inline-flex items-center gap-2 rounded-full border border-terra-200 bg-white px-5 py-2.5 text-sm font-medium text-terra-600 shadow-sm transition-all hover:bg-terra-50 hover:shadow-md active:scale-[0.97]"
+                    className="inline-flex items-center gap-2 rounded-full border border-moss-200 bg-white px-5 py-2.5 text-sm font-medium text-moss-600 shadow-sm transition-all hover:bg-moss-50 hover:shadow-md active:scale-[0.97]"
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="1" width="10" height="14" rx="1.5" />
@@ -523,13 +521,13 @@ function AppointmentSummary({
 
   return (
     <div className="animate-slide-up">
-      <div ref={summaryRef} className="mx-auto max-w-[85%] rounded-2xl border-2 border-terra-200 bg-gradient-to-b from-terra-50/60 to-white p-5 shadow-sm">
+      <div ref={summaryRef} className="mx-auto max-w-[85%] rounded-2xl border-2 border-moss-200 bg-gradient-to-b from-moss-50/60 to-white p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-terra-600">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-moss-600">
             <rect x="3" y="1" width="12" height="16" rx="2" />
             <path d="M6.5 5.5h5M6.5 8.5h5M6.5 11.5h3" />
           </svg>
-          <h3 className="text-sm font-bold text-terra-900">
+          <h3 className="text-sm font-bold text-moss-900">
             What to bring to your appointment
           </h3>
         </div>
@@ -564,7 +562,7 @@ function AppointmentSummary({
             <ul className="space-y-1">
               {suggestedQuestions.map((q, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-terra-100 text-[9px] font-bold text-terra-600">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-moss-100 text-[9px] font-bold text-moss-600">
                     {i + 1}
                   </span>
                   {q}
@@ -589,10 +587,10 @@ function AppointmentSummary({
           </div>
         )}
 
-        <div className="mt-4 border-t border-terra-100 pt-3 flex justify-center">
+        <div className="mt-4 border-t border-moss-100 pt-3 flex justify-center">
           <button
             onClick={handleSavePdf}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-terra-600 transition-colors hover:bg-terra-50"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-moss-600 transition-colors hover:bg-moss-50"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 1v8M3.5 5.5L7 9l3.5-3.5" />
