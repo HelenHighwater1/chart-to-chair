@@ -30,7 +30,10 @@ export async function POST(request: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const parsed = await simpleParser(buffer);
       const from = parsed.from?.text ?? "";
-      const to = parsed.to?.text ?? "";
+      const toField = parsed.to;
+      const to = toField
+        ? (Array.isArray(toField) ? toField.map((a) => a.text).join(", ") : toField.text)
+        : "";
       const subject = parsed.subject ?? "";
       const headerBlock = [from && `From: ${from}`, to && `To: ${to}`, subject && `Subject: ${subject}`]
         .filter(Boolean)

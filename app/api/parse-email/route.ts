@@ -19,7 +19,10 @@ export async function GET(request: Request) {
     const buffer = await readFile(filePath);
     const parsed = await simpleParser(buffer);
     const from = parsed.from?.text ?? "";
-    const to = parsed.to?.text ?? "";
+    const toField = parsed.to;
+    const to = toField
+      ? (Array.isArray(toField) ? toField.map((a) => a.text).join(", ") : toField.text)
+      : "";
     const subject = parsed.subject ?? "";
     const body =
       (parsed.text && parsed.text.trim()) || (parsed.html ? htmlToPlainText(parsed.html) : "");
