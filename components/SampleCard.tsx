@@ -7,9 +7,10 @@ interface SampleCardProps {
   doc: SampleDoc;
   onSelect: (doc: SampleDoc) => void;
   onViewEmail?: (source: EmailViewSource) => void;
+  onViewPdf?: (url: string) => void;
 }
 
-export default function SampleCard({ doc, onSelect, onViewEmail }: SampleCardProps) {
+export default function SampleCard({ doc, onSelect, onViewEmail, onViewPdf }: SampleCardProps) {
   function handleDragStart(e: React.DragEvent) {
     e.dataTransfer.setData("application/sample-doc-id", doc.id);
     e.dataTransfer.effectAllowed = "copy";
@@ -71,6 +72,30 @@ export default function SampleCard({ doc, onSelect, onViewEmail }: SampleCardPro
               onClick={(e) => {
                 e.stopPropagation();
                 onViewEmail({ type: "url", url: doc.fileUrl });
+              }}
+              className="inline-flex items-center gap-1 text-xs text-terra-500 transition-colors hover:text-terra-700"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 1h7v7" />
+                <path d="M11 1L5 7" />
+              </svg>
+              View original file
+            </button>
+          ) : doc.type === "pdf" && onViewPdf ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewPdf(doc.fileUrl);
               }}
               className="inline-flex items-center gap-1 text-xs text-terra-500 transition-colors hover:text-terra-700"
             >

@@ -10,20 +10,26 @@ export interface Message {
   attachmentUrl?: string;
   isStreaming?: boolean;
   cards?: CardSection[];
+  isReviewingPlaceholder?: boolean;
 }
 
 interface ChatMessageProps {
   message: Message;
   onViewEmail?: (source: { type: "url"; url: string } | { type: "blob"; blobUrl: string; filename: string }) => void;
+  onViewPdf?: (url: string) => void;
 }
 
-export default function ChatMessage({ message, onViewEmail }: ChatMessageProps) {
+export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMessageProps) {
   const isUser = message.role === "user";
   const isEmailAttachment =
     message.attachment &&
     (message.attachment.toLowerCase().endsWith(".eml") || message.attachmentUrl?.toLowerCase().includes(".eml"));
+  const isPdfAttachment =
+    message.attachment &&
+    (message.attachment.toLowerCase().endsWith(".pdf") || message.attachmentUrl?.toLowerCase().includes(".pdf"));
   const showEmailModal =
     isEmailAttachment && message.attachmentUrl && onViewEmail;
+  const showPdfModal = isPdfAttachment && message.attachmentUrl && onViewPdf;
 
   if (isUser) {
     return (
@@ -47,6 +53,41 @@ export default function ChatMessage({ message, onViewEmail }: ChatMessageProps) 
                         });
                       }
                     }}
+                    className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700 transition-colors hover:bg-terra-200"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M7 1H3.5a1 1 0 00-1 1v8a1 1 0 001 1h5a1 1 0 001-1V3.5L7 1z" />
+                      <path d="M7 1v2.5h2.5" />
+                    </svg>
+                    {message.attachment}
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="opacity-50"
+                    >
+                      <path d="M4 1h5v5" />
+                      <path d="M9 1L3.5 6.5" />
+                    </svg>
+                  </button>
+                ) : showPdfModal ? (
+                  <button
+                    type="button"
+                    onClick={() => onViewPdf!(message.attachmentUrl!)}
                     className="inline-flex items-center gap-1 rounded-full bg-terra-100 px-2.5 py-0.5 text-xs font-medium text-terra-700 transition-colors hover:bg-terra-200"
                   >
                     <svg
@@ -169,7 +210,7 @@ export default function ChatMessage({ message, onViewEmail }: ChatMessageProps) 
               <span className="inline-block h-3 w-1 animate-pulse rounded-full bg-terra-400" />
             )}
           </div>
-          {!message.isStreaming && message.content && (
+          {!message.isStreaming && message.content && !message.isReviewingPlaceholder && (
             <p className="mt-3 border-t border-warm-gray-200 pt-2 text-[10px] text-warm-gray-400">
               Based on your document — always verify with your doctor
             </p>

@@ -57,14 +57,16 @@ export async function POST(request: Request) {
       );
       console.log(lastUserContent);
 
+      const apiMessages = messages.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
+
       const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2048,
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
         system: SYSTEM_PROMPT,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        messages: apiMessages,
       });
 
       const text =
@@ -150,7 +152,19 @@ export async function POST(request: Request) {
         "Cache-Control": "no-cache",
       },
     });
-  } catch {
-    return new Response("Internal server error", { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status = err && typeof err === "object" && "status" in err
+      ? (err as { status: number }).status
+      : undefined;
+    console.error("[translate] Error:", err);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: message,
+        ...(status !== undefined && { apiStatus: status }),
+      },
+      { status: 500 }
+    );
   }
 }

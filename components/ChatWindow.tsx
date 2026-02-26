@@ -7,6 +7,7 @@ import ChatInput from "./ChatInput";
 import Sidebar from "./Sidebar";
 import LoadingDots from "./LoadingDots";
 import EmailViewModal, { type EmailViewSource } from "./EmailViewModal";
+import PdfViewModal from "./PdfViewModal";
 import { SAMPLE_DOCS, type SampleDoc } from "@/lib/sample-docs";
 import { detectDistress } from "@/lib/emotional-detection";
 import { DISTRESS_PREAMBLE } from "@/lib/prompt";
@@ -24,6 +25,7 @@ export default function ChatWindow() {
   const [showSummary, setShowSummary] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailModalSource, setEmailModalSource] = useState<EmailViewSource | null>(null);
+  const [pdfModalUrl, setPdfModalUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatAreaRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +36,13 @@ export default function ChatWindow() {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    const lastMsg = messages[messages.length - 1];
+    const shouldScroll =
+      messages.length === 0 ||
+      lastMsg?.role === "assistant" ||
+      (pendingCards != null && pendingCards.revealedCount > 0) ||
+      showSummary;
+    if (shouldScroll) scrollToBottom();
   }, [messages, pendingCards?.revealedCount, showSummary, scrollToBottom]);
 
   async function extractFileText(file: File): Promise<string> {
@@ -75,9 +83,11 @@ export default function ChatWindow() {
       body: JSON.stringify({ messages: apiMessages, mode: "cards" }),
     });
 
-    if (!response.ok) throw new Error("Failed to get response");
-
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = data.details || data.error || "Failed to get response";
+      throw new Error(message);
+    }
     if (data.type === "validation_failed") {
       throw new Error(data.error || "Summary may not match the document. Please try again.");
     }
@@ -172,7 +182,12 @@ export default function ChatWindow() {
         setIsStreaming(false);
       }
     } else {
-      setMessages(newMessages);
+      const reviewingPlaceholder: Message = {
+        role: "assistant",
+        content: "Let me just review this document — it will only take a minute.",
+        isReviewingPlaceholder: true,
+      };
+      setMessages([...newMessages, reviewingPlaceholder]);
       setIsLoading(true);
       setPendingCards(null);
       setShowSummary(false);
@@ -188,15 +203,18 @@ export default function ChatWindow() {
           content: cards[0].body,
           cards: [cards[0]],
         };
-        setMessages([...newMessages, firstCardMessage]);
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.isReviewingPlaceholder),
+          firstCardMessage,
+        ]);
         if (cards.length <= 1) {
           setPendingCards(null);
         } else {
           setPendingCards({ cards, revealedCount: 1 });
         }
       } catch (err) {
-        setMessages([
-          ...newMessages,
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.isReviewingPlaceholder),
           {
             role: "assistant",
             content: err instanceof Error ? err.message : "Sorry, something went wrong. Please try again.",
@@ -272,7 +290,12 @@ export default function ChatWindow() {
       attachmentUrl,
     };
     const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    const reviewingPlaceholder: Message = {
+      role: "assistant",
+      content: "Let me just review this document — it will only take a minute.",
+      isReviewingPlaceholder: true,
+    };
+    setMessages([...newMessages, reviewingPlaceholder]);
     setIsLoading(true);
     setPendingCards(null);
     setShowSummary(false);
@@ -288,15 +311,18 @@ export default function ChatWindow() {
         content: cards[0].body,
         cards: [cards[0]],
       };
-      setMessages([...newMessages, firstCardMessage]);
+      setMessages((prev) => [
+        ...prev.filter((m) => !m.isReviewingPlaceholder),
+        firstCardMessage,
+      ]);
       if (cards.length <= 1) {
         setPendingCards(null);
       } else {
         setPendingCards({ cards, revealedCount: 1 });
       }
     } catch (err) {
-      setMessages([
-        ...newMessages,
+      setMessages((prev) => [
+        ...prev.filter((m) => !m.isReviewingPlaceholder),
         {
           role: "assistant",
           content: err instanceof Error ? err.message : "Sorry, something went wrong. Please try again.",
@@ -344,9 +370,13 @@ export default function ChatWindow() {
     setEmailModalOpen(true);
   }
 
+  function openPdfViewer(url: string) {
+    setPdfModalUrl(url);
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 gap-6 px-6 pb-6">
-      <Sidebar onSelectSample={handleSampleFromSidebar} onViewEmail={openEmailViewer} />
+      <Sidebar onSelectSample={handleSampleFromSidebar} onViewEmail={openEmailViewer} onViewPdf={openPdfViewer} />
 
       <div
         className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-warm-gray-200 bg-white shadow-sm"
@@ -376,7 +406,7 @@ export default function ChatWindow() {
                     <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                   </svg>
                 </div>
-                <p className="text-sm text-warm-gray-500">
+                <p className="text-sm font-semibold text-warm-gray-600">
                   Upload a document or pick a sample to start
                   <br />
                   preparing for your next appointment.
@@ -396,7 +426,7 @@ export default function ChatWindow() {
                   );
                 }
 
-                return <ChatMessage key={i} message={msg} onViewEmail={openEmailViewer} />;
+                return <ChatMessage key={i} message={msg} onViewEmail={openEmailViewer} onViewPdf={openPdfViewer} />;
               })}
 
               {isLoading && !pendingCards && (
@@ -451,6 +481,11 @@ export default function ChatWindow() {
         isOpen={emailModalOpen}
         onClose={() => setEmailModalOpen(false)}
         source={emailModalSource}
+      />
+      <PdfViewModal
+        isOpen={pdfModalUrl != null}
+        onClose={() => setPdfModalUrl(null)}
+        url={pdfModalUrl}
       />
     </div>
   );
