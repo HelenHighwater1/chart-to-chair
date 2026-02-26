@@ -17,12 +17,22 @@ export default function Header() {
               <span className="text-moss-600">for Citizen Health</span>
             </span>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-full border border-moss-200 px-4 py-1.5 text-sm font-medium text-moss-600 transition-colors hover:bg-moss-50"
-          >
-            About Me
-          </button>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/HelenHighwater1/chart-to-chair?tab=readme-ov-file#prepare-for-your-next-appointment"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-moss-200 px-4 py-1.5 text-sm font-medium text-moss-600 transition-colors hover:bg-moss-50"
+            >
+              Project's README
+            </a>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="rounded-full border border-moss-200 px-4 py-1.5 text-sm font-medium text-moss-600 transition-colors hover:bg-moss-50"
+            >
+              About Me
+            </button>
+          </div>
         </div>
       </header>
       <AboutMeModal

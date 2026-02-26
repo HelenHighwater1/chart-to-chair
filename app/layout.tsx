@@ -19,7 +19,7 @@ const dmSerifDisplay = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Plain Language Medical Records — Helen for Citizen Health",
+  title: "Plain Language Medical Records - Helen for Citizen Health",
   description:
     "Paste a clinical note or lab result and get a clear, jargon-free explanation with follow-up questions for your next doctor visit.",
   icons: {

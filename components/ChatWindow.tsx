@@ -213,7 +213,7 @@ export default function ChatWindow() {
     const reviewingPlaceholder: Message = {
       id: nextMessageId(),
       role: "assistant",
-      content: "Let me just review this document — it will only take a minute.",
+      content: "Let me just review this document - it will only take a minute.",
       isReviewingPlaceholder: true,
     };
     setMessages([...newMessages, reviewingPlaceholder]);

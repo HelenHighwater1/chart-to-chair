@@ -6,7 +6,7 @@ export default function HeroArea() {
           Prepare for your next appointment
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-warm-gray-500">
-          Upload a medical document or use a mock data example — no need to drop in your own PDF. Get a clear summary with questions to bring to your doctor.
+          Upload a medical document or use a mock data example - no need to drop in your own PDF. Get a clear summary with questions to bring to your doctor.
         </p>
       </div>
 
@@ -28,7 +28,7 @@ export default function HeroArea() {
             />
           </svg>
           <p className="text-sm leading-relaxed text-amber-800/90">
-            <span className="font-semibold">This is a demo project</span> — not
+            <span className="font-semibold">This is a demo project</span> - not
             a real medical tool. Do not enter real patient information. Not HIPAA
             compliant.
           </p>

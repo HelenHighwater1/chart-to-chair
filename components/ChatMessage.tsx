@@ -213,7 +213,7 @@ export default function ChatMessage({ message, onViewEmail, onViewPdf }: ChatMes
           </div>
           {!message.isStreaming && message.content && !message.isReviewingPlaceholder && (
             <p className="mt-3 border-t border-warm-gray-200 pt-2 text-[10px] text-warm-gray-400">
-              Based on your document — always verify with your doctor
+              Based on your document - always verify with your doctor
             </p>
           )}
         </div>
