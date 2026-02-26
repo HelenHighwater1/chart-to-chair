@@ -51,11 +51,6 @@ export async function POST(request: Request) {
     if (mode === "cards") {
       const lastUserContent =
         messages.filter((m) => m.role === "user").pop()?.content ?? "";
-      console.log("EXTRACTION COMPLETE");
-      console.log(
-        "[translate/cards] Full extracted text sent to API (entire string):"
-      );
-      console.log(lastUserContent);
 
       const apiMessages = messages.map((m) => ({
         role: m.role as "user" | "assistant",
@@ -116,6 +111,11 @@ export async function POST(request: Request) {
     }
 
     const encoder = new TextEncoder();
+    const systemPromptSuffix: string | undefined = body.systemPromptSuffix;
+    const streamSystem =
+      typeof systemPromptSuffix === "string" && systemPromptSuffix.trim()
+        ? FOLLOW_UP_SYSTEM_PROMPT + "\n\n" + systemPromptSuffix.trim()
+        : FOLLOW_UP_SYSTEM_PROMPT;
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
             model: "claude-sonnet-4-20250514",
             max_tokens: 2048,
             stream: true,
-            system: FOLLOW_UP_SYSTEM_PROMPT,
+            system: streamSystem,
             messages: messages.map((m) => ({
               role: m.role,
               content: m.content,

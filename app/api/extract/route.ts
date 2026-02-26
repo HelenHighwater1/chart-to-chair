@@ -1,33 +1,9 @@
 import { NextResponse } from "next/server";
+import { htmlToPlainText } from "@/lib/html-to-plain-text";
+import { simpleParser } from "mailparser";
+// pdf-parse is CommonJS-only; dynamic require used for compatibility
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require("pdf-parse/lib/pdf-parse");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { simpleParser } = require("mailparser");
-
-/** Strip HTML tags and decode common entities to get readable plain text. */
-function htmlToPlainText(html: string): string {
-  if (!html || typeof html !== "string") return "";
-  let text = html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n")
-    .replace(/<\/div>/gi, "\n")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .join("\n");
-  return text;
-}
 
 export async function POST(request: Request) {
   try {

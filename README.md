@@ -70,22 +70,31 @@ The AI is instructed to be honest but reassuring, explain *why* things matter (n
 
 ```
 app/
-  layout.tsx              Root layout with fonts and metadata
-  page.tsx                Single page composing all sections
-  globals.css             Tailwind config + custom animations
-  api/translate/route.ts  Streaming API route for Claude
+  layout.tsx                Root layout with fonts and metadata
+  page.tsx                  Single page composing all sections
+  globals.css               Tailwind config + custom animations
+  api/translate/route.ts    Streaming API route for Claude
+  api/extract/route.ts      File text extraction (PDF, TXT, EML)
+  api/parse-email/route.ts  Parse EML from public URL for preview
 components/
-  Header.tsx              Sticky header with About Me trigger
-  Hero.tsx                Hero section with headline
-  MedicalTranslator.tsx   Main client component (state management)
-  TranslateForm.tsx       Textarea + sample + submit
-  ResultsPanel.tsx        Streaming results with copy buttons
-  AboutMeModal.tsx        Modal with focus trap + keyboard dismissal
-  LoadingDots.tsx         Calm pulsing dot animation
-  Footer.tsx              Footer with GitHub link
+  Header.tsx                Sticky header with About Me trigger
+  HeroArea.tsx              Hero section with headline
+  ChatWindow.tsx            Main client component (state, messages, cards)
+  ChatInput.tsx             Textarea + file attach + submit
+  Sidebar.tsx               Mock data sample list
+  SampleCard.tsx            Sample doc card with drag and view
+  ChatMessage.tsx            Single message or card list
+  CardMessage.tsx           One summary card (finding, questions, etc.)
+  AboutMeModal.tsx          Modal with focus trap + keyboard dismissal
+  EmailViewModal.tsx        View email content (URL or blob)
+  PdfViewModal.tsx         View PDF in iframe
+  LoadingDots.tsx           Calm pulsing dot animation
+  Footer.tsx                Footer with GitHub link
 lib/
-  prompt.ts               System prompt for Claude
-  sample-note.ts          Sample CBC lab result for demo
+  prompt.ts                 System prompt for Claude
+  sample-docs.ts            Sample document definitions (PDF/email)
+  emotional-detection.ts    Distress keyword detection
+  html-to-plain-text.ts     Shared HTML-to-plain-text for email body
 ```
 
 ## License
